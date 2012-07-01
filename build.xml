@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<project basedir="." default="build" name="combo">
+	
+    <property environment="env"/>
+	<property name="TOMCAT5_HOME" value="../../AppData/Local/Apache/Tomcat 5.5"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+	
+	<!-- Tomcat libraries -->
+    <path id="tomcat.libraryclasspath">
+    	<fileset dir="${TOMCAT5_HOME}/common/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+    </path>
+	
+	<!-- Combo project classpath -->
+    <path id="combo.classpath">
+        <pathelement location="build/classes"/>
+        <path refid="tomcat.libraryclasspath"/>
+    </path>
+	
+	<!-- Cleans out the build directory -->
+	    <target name="clean">
+	        <delete dir="build/classes"/>
+	    </target>
+	
+	<!-- Sets up build directory... and copies non-java files? -->
+    <target name="init" depends="clean">
+        <mkdir dir="build/classes"/>
+        <copy includeemptydirs="false" todir="build/classes">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+	
+	<!-- Compiles source files -->
+    <target depends="init" name="compile">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="build/classes" source="${source}" target="${target}" includeantruntime="false">
+            <src path="src"/>
+            <classpath refid="combo.classpath"/>
+        </javac>
+    </target>
+	
+	<!-- Builds the project -->
+	<target depends="compile" name="build"/>
+	
+	<target depends="build" name="deploy" description="deploys the project">
+		<sync todir="${TOMCAT5_HOME}/webapps/${ant.project.name}">
+			<fileset dir="WebContent"/>
+		</sync>
+		<sync todir="${TOMCAT5_HOME}/webapps/${ant.project.name}/WEB-INF/classes">
+			<fileset dir="build/classes"/>
+		</sync>
+	</target>
+	
+</project>
